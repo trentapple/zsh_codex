@@ -239,13 +239,20 @@ zsh-utility-option ::= zsh-simple-word
 """
 )
 
+#sys_msg = 'You are a zsh shell export, please help me complete the command, and only respond with the completed line.'
+#sys_msg = 'You are a zsh shell export, please help me complete the command, and only respond with the completed line command which will be run by the user.'
+sys_msg = 'You are a zsh shell export, please help me complete the command, and only respond with the completed line command which will be run.'
+
 data = {
     'model': model,
     #'prompt': full_command,
-    'prompt': ['[INST] <<SYS>>\nYou are a zsh shell export, please help me complete the command, and only respond with the completed line.\n<</SYS>>\n\n' + full_command + ' [/INST]'],
+    # Prompt template: dolphin / ChatML
+    'prompt': ['<|im_start|>system\n' + sys_msg + '<|im_end|>\n<|im_start|>user\n' + full_command + '<|im_end|>\n<|im_start|>assistant'],
+    # Prompt template: LLaMa 2 System Prompt / Instruct format
+#    'prompt': ['[INST] <<SYS>>\n' + sys_msg + '\n<</SYS>>\n\n' + full_command + ' [/INST]'],
     'input_prefix': prompt_prefix,
     'input_suffix': prompt_suffix,
-    #'max_tokens': 512,
+#    'max_tokens': 512,
     'max_tokens': 192,
     'temperature': 0.5,
     'n': 1,
@@ -271,10 +278,18 @@ else:
 
 #completed_command=completed_command[39:].replace(prompt_prefix, '')
 
-# Optimistically remove the prompt prefix and incomplete command from the completion response
 completed_command=completed_command[39:].replace('#!/bin/zsh\n\n', '')
 completed_command=completed_command.replace(prompt_prefix, '')
 completed_command=completed_command.replace(prompt_prefix.replace('#!/bin/zsh\n\n', ''), '')
+completed_command=completed_command.replace('\n<|im_start|>system\n', '')
+completed_command=completed_command.replace('\n<|im_start|>system', '')
+completed_command=completed_command.replace('<|im_start|>system\n', '')
+completed_command=completed_command.replace('<|im_start|>system', '')
+completed_command=completed_command.replace('<|im_start|>user', '')
+completed_command=completed_command.replace('<|im_start|>assistant', '')
+completed_command=completed_command.replace('<|im_start|>', '')
+completed_command=completed_command.replace('\n<|im_end|>', '')
+completed_command=completed_command.replace('<|im_end|>', '')
 
 #    print('Error: API response does not contain "choices" key')
 #    sys.exit(1)
